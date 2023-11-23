@@ -16,24 +16,23 @@ const App = () => {
   const [totalImages, setTotalImages] = useState(0);
   const [loading, setLoading] = useState(false);
 
-  const searchByData = async () => {
-    try {
-      setLoading(true);
-      const data = await getImages(q, page);
-
-      setResults(prevState => [...prevState, ...data.hits]);
-      setTotalImages(data.totalHits);
-    } catch (error) {
-      toast.error('🦄 Something went wrong');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
     if (q === '' && page === 1) {
       return;
     }
+    const searchByData = async () => {
+      try {
+        setLoading(true);
+        const data = await getImages(q, page);
+
+        setResults(prevState => [...prevState, ...data.hits]);
+        setTotalImages(data.totalHits);
+      } catch (error) {
+        toast.error('🦄 Something went wrong');
+      } finally {
+        setLoading(false);
+      }
+    };
     searchByData();
   }, [q, page]);
 
