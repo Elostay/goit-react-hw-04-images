@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -9,77 +9,76 @@ import Button from './Button/Button';
 import DNA from './Loader/Loader';
 import getImages from 'helpers/api';
 
-class App extends Component {
-  state = {
-    results: [],
-    q: '',
-    page: 1,
-    totalImages: 0,
-    loading: false,
-  };
+const App = () => {
+  const [results, setResults] = useState([]);
+  const [q, setQ] = useState('');
+  const [page, setPage] = useState(1);
+  const [totalImages, setTotalImages] = useState(0);
+  const [loading, setLoading] = useState(false);
 
-  componentDidUpdate(prevProps, prevState) {
-    if (prevState.q !== this.state.q || prevState.page !== this.state.page) {
-      this.searchByData();
-    }
-  }
-
-  searchByData = async () => {
+  const searchByData = async () => {
     try {
-      this.setState({ loading: true });
-      const data = await getImages(this.state.q, this.state.page);
+      setLoading(true);
+      const data = await getImages(q, page);
 
-      this.setState(prevState => ({
-        results: [...prevState.results, ...data.hits],
-        totalImages: data.totalHits,
-      }));
+      setResults(prevState => [...prevState, ...data.hits]);
+      setTotalImages(data.totalHits);
     } catch (error) {
       toast.error('🦄 Something went wrong');
     } finally {
-      this.setState({ loading: false });
+      setLoading(false);
     }
   };
 
-  inputHandler = query => {
+  useEffect(() => {
+    if (q === '' && page === 1) {
+      return;
+    }
+    searchByData();
+  }, [q, page]);
+
+  const inputHandler = query => {
     if (query === '') {
       toast.info('🦄 Enter something');
       return;
     }
-    this.setState({ q: query, page: 1, results: [], totalImages: 0 });
+
+    setQ(query);
+    setPage(1);
+    setResults([]);
+    setTotalImages(0);
   };
 
-  loadMore = async () => {
-    this.setState(prevState => ({ page: prevState.page + 1 }));
+  const loadMore = async () => {
+    setPage(prevState => prevState + 1);
   };
-  render() {
-    const { results, totalImages, loading } = this.state;
-    return (
-      <AppContainer>
-        <Searchbar onSubmit={this.inputHandler} />
 
-        <ImageGallery array={results} />
-        {loading ? (
-          <DNA />
-        ) : (
-          totalImages > results.length &&
-          !!totalImages && <Button onClick={this.loadMore} />
-        )}
+  return (
+    <AppContainer>
+      <Searchbar onSubmit={inputHandler} />
 
-        <ToastContainer
-          position="top-right"
-          autoClose={3000}
-          hideProgressBar={false}
-          newestOnTop={false}
-          closeOnClick
-          rtl={false}
-          pauseOnFocusLoss
-          draggable
-          pauseOnHover
-          theme="colored"
-        />
-      </AppContainer>
-    );
-  }
-}
+      <ImageGallery array={results} />
+      {loading ? (
+        <DNA />
+      ) : (
+        totalImages > results.length &&
+        !!totalImages && <Button onClick={loadMore} />
+      )}
+
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="colored"
+      />
+    </AppContainer>
+  );
+};
 
 export default App;
