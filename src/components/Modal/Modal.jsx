@@ -3,15 +3,15 @@ import { Overlay, ModalStyle } from './Modal.styled';
 
 const Modal = ({ largeImg, onClose }) => {
   useEffect(() => {
+    const handleEsc = e => {
+      e.code === 'Escape' && onClose();
+    };
     document.addEventListener('keydown', handleEsc);
     return () => {
       document.removeEventListener('keydown', handleEsc);
     };
-  }, []);
+  }, [onClose]);
 
-  const handleEsc = e => {
-    e.code === 'Escape' && onClose();
-  };
   const handleClick = e => {
     e.target === e.currentTarget && onClose();
   };
