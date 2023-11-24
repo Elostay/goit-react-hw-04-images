@@ -25,7 +25,13 @@ const App = () => {
         setLoading(true);
         const data = await getImages(q, page);
 
-        setResults(prevState => [...prevState, ...data.hits]);
+        const images = data.hits.map(({ id, webformatURL, largeImageURL }) => ({
+          id,
+          webformatURL,
+          largeImageURL,
+        }));
+
+        setResults(prevState => [...prevState, ...images]);
         setTotalImages(data.totalHits);
       } catch (error) {
         toast.error('🦄 Something went wrong');
